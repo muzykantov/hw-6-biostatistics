@@ -1,0 +1,108 @@
+### Задание общих параметров
+
+```{r}
+# Общие параметры
+significance_level <- 0.05
+power <- 0.2
+dropout_rate <- 0.1
+
+# Квантили нормального распределения
+z_critical <- abs(qnorm(1 - significance_level / 2))
+z_power <- abs(qnorm(power))
+
+# Выводим квантили
+z_critical
+z_power
+```
+
+## Задание 1
+
+Рассчитайте выборку для исследования терапевтической эквивалентности для двухпериодного cross-over дизайна. Из предыдущих исследований известно, что дисперсия составляет 20% \( \sigma_m = 0.20 \), а разница средних составляет −10% \( \varepsilon = \mu_{\text{test}} - \mu_{\text{reference}} \). Клиницисты сообщают нам, что клинически значимая разница составляет 25% \( \delta = 0.25 \).
+
+Используйте следующую формулу:
+$$
+n_1 = n_2 = \frac{(Z_{\alpha / 2} + Z_\beta)^2 \sigma_m^2}{2 * (\delta - |\varepsilon|)^2}, \quad n = n_1 + n_2
+$$
+
+```{r}
+# Параметры для расчета
+variance <- 0.20  # Дисперсия
+mean_difference <- 0.1  # Разница средних
+clinically_significant_diff <- 0.25  # Клинически значимая разница
+
+# Расчет размера выборки
+numerator <- (z_critical + z_power)^2 * variance
+denominator <- 2 * (clinically_significant_diff - abs(mean_difference))^2
+sample_size_base <- numerator / denominator
+
+# Корректировка на drop-out rate
+sample_size_adjusted <- sample_size_base / (1 - dropout_rate)
+sample_size_per_group <- ceiling(sample_size_adjusted)
+total_sample_size <- sample_size_per_group * 2
+
+# Вывод результатов
+cat('Размер выборки для каждой группы:', sample_size_per_group, '\n')
+cat('Общий размер выборки:', total_sample_size, '\n')
+```
+
+## Задание 2
+
+Рассчитайте выборку для гипотезы non-inferiority для двухвыборочного параллельного дизайна. Пусть клинически значимая разница \( \delta = -0.1 \), то есть мы ожидаем разницу не меньше 10%, а долю ответов для тестового препарата \( p_2 = 0.65 \), в то время как нам известно из предыдущих исследований, что доля ответов у препарата сравнения составляет \( p_1 = 0.85 \). Соотношение групп равно \( k = 1 \).
+
+Используйте следующую формулу:
+$$
+n_1 = n_2 = \frac{(Z_{\alpha / 2} + Z_\beta)^2 (p_1^*(1 - p_1) + p_2^*(1 - p_2))}{(p_1 - p_2 - \delta)^2}, \quad n = n_1 + n_2
+$$
+
+```{r}
+# Клинически значимая разница и доля ответов
+non_inferiority_margin <- -0.1
+response_rate_test <- 0.65
+response_rate_reference <- 0.85
+
+# Расчет размера выборки
+numerator <- (z_critical + z_power)^2 * (response_rate_reference * (1 - response_rate_reference) + response_rate_test * (1 - response_rate_test))
+denominator <- (response_rate_reference - response_rate_test - non_inferiority_margin)^2
+sample_size_base <- numerator / denominator
+
+# Корректировка на drop-out rate
+sample_size_adjusted <- sample_size_base / (1 - dropout_rate)
+sample_size_per_group <- ceiling(sample_size_adjusted)
+total_sample_size <- sample_size_per_group * 2
+
+# Вывод результатов
+cat('Размер выборки для каждой группы:', sample_size_per_group, '\n')
+cat('Общий размер выборки:', total_sample_size, '\n')
+```
+
+## Задание 3
+
+Рассчитайте выборку для гипотезы equality для следующего исследования. Мы хотим сравнить новую терапию инфекции, присоединяющейся в больничных условиях у пациентов с ожогами, с золотым стандартом, основываясь на данных, анализируемых с помощью регрессии Кокса. Пусть отношение рисков «золотой стандарт / новая терапия», hazard ratio, HR = 2. Мы предполагаем, что 80% пациентов \( d = 0.8 \) могут столкнуться с этим заболеванием. Соотношения групп терапии равны \( p_1 = p_2 = 0.5 \).
+
+Используйте следующую формулу:
+$$
+n_1 = n_2 = \frac{(Z_{\alpha
+
+ / 2} + Z_\beta)^2}{\ln (HR)^2 p_1 p_2 d}, \quad n = n_1 + n_2
+$$
+
+```{r}
+# Параметры для расчета
+hazard_ratio <- 2
+disease_incidence <- 0.8  # Процент пациентов, сталкивающихся с заболеванием
+group_ratio <- 0.5  # Соотношение групп
+
+# Расчет размера выборки
+numerator <- (z_critical + z_power)^2
+denominator <- (log(hazard_ratio))^2 * group_ratio * group_ratio * disease_incidence
+sample_size_base <- numerator / denominator
+
+# Корректировка на drop-out rate
+sample_size_adjusted <- sample_size_base / (1 - dropout_rate)
+sample_size_per_group <- ceiling(sample_size_adjusted)
+total_sample_size <- sample_size_per_group * 2
+
+# Вывод результатов
+cat('Размер выборки для каждой группы:', sample_size_per_group, '\n')
+cat('Общий размер выборки:', total_sample_size, '\n')
+```
